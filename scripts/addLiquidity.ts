@@ -141,7 +141,6 @@ async function main() {
 
   // Setup
   const chain = network === 'base' ? base : celo;
-  const contracts = CONTRACTS[network];
   const account = privateKeyToAccount(privateKey as `0x${string}`);
 
   const publicClient = createPublicClient({
@@ -159,7 +158,7 @@ async function main() {
   console.log('====================================');
   console.log(`Network: ${network}`);
   console.log(`Wallet: ${account.address}`);
-  console.log(`Position Manager: ${contracts.positionManager}`);
+  console.log(`Position Manager: ${CONTRACTS[network].positionManager}`);
 
   // Define tokens and amounts based on network
   let token0Addr: string, token1Addr: string;
@@ -168,6 +167,7 @@ async function main() {
   let amount0: bigint, amount1: bigint;
 
   if (network === 'base') {
+    const contracts = CONTRACTS['base'];
     [token0Addr, token1Addr] = sortTokens(contracts.WETH, contracts.USDC);
     const isUSDCFirst = contracts.USDC.toLowerCase() < contracts.WETH.toLowerCase();
     
@@ -187,6 +187,7 @@ async function main() {
       amount1 = parseUnits(amount1Input, decimals1); // USDC amount
     }
   } else {
+    const contracts = CONTRACTS['celo'];
     [token0Addr, token1Addr] = sortTokens(contracts.CELO, contracts.cUSD);
     const isCUSDFirst = contracts.cUSD.toLowerCase() < contracts.CELO.toLowerCase();
     
@@ -246,7 +247,7 @@ async function main() {
     address: token0Addr as `0x${string}`,
     abi: ERC20_ABI,
     functionName: 'allowance',
-    args: [account.address, contracts.positionManager],
+    args: [account.address, CONTRACTS[network].positionManager],
   });
 
   if ((allowance0 as bigint) < amount0) {
@@ -255,7 +256,7 @@ async function main() {
       address: token0Addr as `0x${string}`,
       abi: ERC20_ABI,
       functionName: 'approve',
-      args: [contracts.positionManager, maxUint256],
+      args: [CONTRACTS[network].positionManager, maxUint256],
     });
     console.log(`Approval tx: ${approveHash}`);
     await publicClient.waitForTransactionReceipt({ hash: approveHash });
@@ -268,7 +269,7 @@ async function main() {
     address: token1Addr as `0x${string}`,
     abi: ERC20_ABI,
     functionName: 'allowance',
-    args: [account.address, contracts.positionManager],
+    args: [account.address, CONTRACTS[network].positionManager],
   });
 
   if ((allowance1 as bigint) < amount1) {
@@ -277,7 +278,7 @@ async function main() {
       address: token1Addr as `0x${string}`,
       abi: ERC20_ABI,
       functionName: 'approve',
-      args: [contracts.positionManager, maxUint256],
+      args: [CONTRACTS[network].positionManager, maxUint256],
     });
     console.log(`Approval tx: ${approveHash}`);
     await publicClient.waitForTransactionReceipt({ hash: approveHash });
@@ -292,7 +293,7 @@ async function main() {
     currency1: token1Addr as `0x${string}`,
     fee: DYNAMIC_FEE_FLAG,
     tickSpacing: 60,
-    hooks: contracts.hook,
+    hooks: CONTRACTS[network].hook,
   };
 
   // Get tick range

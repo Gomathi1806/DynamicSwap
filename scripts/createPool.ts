@@ -96,7 +96,6 @@ async function main() {
 
   // Setup
   const chain = network === 'base' ? base : celo;
-  const contracts = CONTRACTS[network];
   const account = privateKeyToAccount(privateKey as `0x${string}`);
 
   const publicClient = createPublicClient({
@@ -114,13 +113,14 @@ async function main() {
   console.log('===================================');
   console.log(`Network: ${network}`);
   console.log(`Wallet: ${account.address}`);
-  console.log(`Hook: ${contracts.hook}`);
+  console.log(`Hook: ${CONTRACTS[network].hook}`);
 
   // Define pool parameters
   let token0: string, token1: string, initialPrice: number;
 
   if (network === 'base') {
     // WETH/USDC pool
+    const contracts = CONTRACTS['base'];
     [token0, token1] = sortTokens(contracts.WETH, contracts.USDC);
     // Initial price: 1 WETH = 2500 USDC
     // If USDC < WETH, price is WETH/USDC = 2500
@@ -129,6 +129,7 @@ async function main() {
     console.log(`\nCreating WETH/USDC pool`);
   } else {
     // CELO/cUSD pool
+    const contracts = CONTRACTS['celo'];
     [token0, token1] = sortTokens(contracts.CELO, contracts.cUSD);
     // Initial price: 1 CELO = 0.50 cUSD
     initialPrice = contracts.cUSD.toLowerCase() < contracts.CELO.toLowerCase() ? 0.5 : 2;
@@ -145,7 +146,7 @@ async function main() {
     currency1: token1 as `0x${string}`,
     fee: DYNAMIC_FEE_FLAG,
     tickSpacing: 60,
-    hooks: contracts.hook,
+    hooks: CONTRACTS[network].hook,
   };
 
   // Calculate sqrtPriceX96
@@ -156,7 +157,7 @@ async function main() {
   console.log('\nEstimating gas...');
   try {
     const gas = await publicClient.estimateContractGas({
-      address: contracts.poolManager,
+      address: CONTRACTS[network].poolManager,
       abi: POOL_MANAGER_ABI,
       functionName: 'initialize',
       args: [poolKey, sqrtPriceX96],
@@ -176,7 +177,7 @@ async function main() {
   console.log('\nSending transaction...');
   try {
     const hash = await walletClient.writeContract({
-      address: contracts.poolManager,
+      address: CONTRACTS[network].poolManager,
       abi: POOL_MANAGER_ABI,
       functionName: 'initialize',
       args: [poolKey, sqrtPriceX96],

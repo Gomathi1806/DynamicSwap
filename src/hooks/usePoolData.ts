@@ -227,10 +227,11 @@ export function useKnownPools() {
 
   if (contracts && tokens && chainId === 8453) {
     // Base pools
+    const baseTokens = tokens as typeof TOKENS[8453];
     // Example: WETH/USDC pool
     const [currency0, currency1] = sortTokens(
-      tokens.WETH.address,
-      tokens.USDC.address
+      baseTokens.WETH.address,
+      baseTokens.USDC.address
     );
     knownPoolKeys.push({
       currency0,
@@ -243,10 +244,11 @@ export function useKnownPools() {
 
   if (contracts && tokens && chainId === 42220) {
     // Celo pools
+    const celoTokens = tokens as typeof TOKENS[42220];
     // Example: CELO/cUSD pool
     const [currency0, currency1] = sortTokens(
-      tokens.CELO.address,
-      tokens.cUSD.address
+      celoTokens.CELO.address,
+      celoTokens.cUSD.address
     );
     knownPoolKeys.push({
       currency0,

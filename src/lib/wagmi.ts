@@ -1,11 +1,33 @@
-import { getDefaultConfig } from '@rainbow-me/rainbowkit';
+import { http, createConfig } from 'wagmi';
 import { base, celo } from 'wagmi/chains';
-import { http } from 'wagmi';
+import { connectorsForWallets } from '@rainbow-me/rainbowkit';
+import {
+  rainbowWallet,
+  metaMaskWallet,
+  coinbaseWallet,
+  walletConnectWallet,
+} from '@rainbow-me/rainbowkit/wallets';
 
-// RainbowKit config
-export const config = getDefaultConfig({
-  appName: 'DynamicSwap',
-  projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_ID || 'demo-project-id',
+const connectors = connectorsForWallets(
+  [
+    {
+      groupName: 'Recommended',
+      wallets: [
+        rainbowWallet,
+        metaMaskWallet,
+        coinbaseWallet,
+        walletConnectWallet,
+      ],
+    },
+  ],
+  {
+    appName: 'DynamicSwap',
+    projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_ID || 'demo-project-id',
+  }
+);
+
+export const config = createConfig({
+  connectors,
   chains: [base, celo],
   transports: {
     [base.id]: http('https://mainnet.base.org'),

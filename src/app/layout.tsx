@@ -1,6 +1,10 @@
 import type { Metadata } from 'next';
-import { Providers } from '@/components/Providers';
+import dynamic from 'next/dynamic';
 import './globals.css';
+
+const Providers = dynamic(() => import('@/components/Providers').then(mod => mod.Providers), {
+  ssr: false,
+});
 
 export const metadata: Metadata = {
   title: 'DynamicSwap | Dynamic Fee Protection',
